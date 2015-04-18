@@ -22,15 +22,27 @@ namespace Hw2
             {
                 hashArray[i] = i;
             }
-            
-            
+
+            Random random = new Random();
+            double a = random.NextDouble() % primeNum;
+            double b = random.NextDouble() % primeNum;
+            double x = 0;
+            int hashedValue = (int)(((a * x + b) % primeNum) % n);
+            hashArray[hashedValue] = x;
+
             Console.WriteLine(primeNum);
             Console.ReadLine();
         }
 
+        static double getShiftedHashValue(long x, long l, long a)
+        {
+            // hashes x universally into l bits using the random odd seed a.
+            return (a * x) >> (int)(64 - l);
+        }
+
         private static long getPrimeNumber()
         {
-            long largeNum = (long) Math.Pow(2, 60);
+            long largeNum = (long)Math.Pow(2, 60);
             long primeNum = -1;
             System.Console.WriteLine(largeNum);
 
