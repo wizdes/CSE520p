@@ -58,95 +58,101 @@ namespace Hw2
             int numElements = 100;
 
             int hashTableSize = n;
-            int[] hashArrayCount = new int[hashTableSize];
-            Stopwatch timePerParse;
+            int hashTableMultiplier = 0;
 
-            for (numElements = 100; numElements < n + 1; numElements = numElements + nextIter(numElements))
+            for(hashTableSize = n; hashTableSize < 6 * n; hashTableSize = hashTableSize + n)
             {
-                timePerParse = Stopwatch.StartNew();
+                hashTableMultiplier += 1;
+                int[] hashArrayCount = new int[hashTableSize];
+                Stopwatch timePerParse;
 
-                //List<double>[] hashTable = new List<double>[n];
-                for (int i = 0; i < n; i++)
+                for (numElements = n; numElements < n + 1; numElements = numElements + nextIter(numElements))
                 {
-                    hashArrayCount[i] = 0;
-                }
+                    timePerParse = Stopwatch.StartNew();
 
-                int longestProbe = 0;
-                double sumSquareProbeLengths = 0;
-
-                for (int i = 0; i < numElements; i++)
-                {
-                    x = generateX(random);
-
-                    if (readingNumbersFromFile)
+                    //List<double>[] hashTable = new List<double>[n];
+                    for (int i = 0; i < n; i++)
                     {
-                        x = (long)numbersReadFromFile[i];
-                    }
-                    int hashedValue = 0;
-                    //hashedValue = GetShiftedHashValue(hashedValue, x, odd_a);
-                    //hashedValue = GetModPrimeHashValue(hashedValue, a, x, b, primeNum);
-                    hashedValue = getFavoriteHashValue(hashedValue, a, x, odd_a, b, primeNum);
-
-                    int index = hashedValue;
-                    int probeLength = 0;
-                    while (hashArrayCount[index] > 0)
-                    {
-                        index = (index + 1) % hashTableSize;
-                        probeLength += 1;
+                        hashArrayCount[i] = 0;
                     }
 
-                    if (probeLength > longestProbe)
+                    int longestProbe = 0;
+                    double sumSquareProbeLengths = 0;
+
+                    for (int i = 0; i < numElements; i++)
                     {
-                        longestProbe = probeLength;
+                        x = generateX(random);
+
+                        if (readingNumbersFromFile)
+                        {
+                            x = (long)numbersReadFromFile[i];
+                        }
+                        int hashedValue = 0;
+                        //hashedValue = GetShiftedHashValue(hashedValue, x, odd_a);
+                        //hashedValue = GetModPrimeHashValue(hashedValue, a, x, b, primeNum);
+                        hashedValue = getFavoriteHashValue(hashedValue, a, x, odd_a, b, primeNum);
+
+                        int index = hashedValue;
+                        int probeLength = 0;
+                        while (hashArrayCount[index] > 0)
+                        {
+                            index = (index + 1) % hashTableSize;
+                            probeLength += 1;
+                        }
+
+                        if (probeLength > longestProbe)
+                        {
+                            longestProbe = probeLength;
+                        }
+                        sumSquareProbeLengths += probeLength * probeLength;
+
+                        hashArrayCount[index] += 1;
+
+                        hashArrayCount[hashedValue]++;
+
+                        //if (hashTable[hashedValue] == null)
+                        //{
+                        //    hashTable[hashedValue] = new List<double>();
+                        //}
+
+                        //hashTable[hashedValue].Add(x);
                     }
-                    sumSquareProbeLengths += probeLength*probeLength;
 
-                    hashArrayCount[index] += 1;
+                    timePerParse.Stop();
+                    long ticksThisTime = timePerParse.ElapsedTicks;
 
-                    hashArrayCount[hashedValue]++;
+                    double sumSquared = 0;
+                    int largest = 0;
+                    int time = (int)ticksThisTime;
 
-                    //if (hashTable[hashedValue] == null)
-                    //{
-                    //    hashTable[hashedValue] = new List<double>();
-                    //}
-
-                    //hashTable[hashedValue].Add(x);
-                }
-
-                timePerParse.Stop();
-                long ticksThisTime = timePerParse.ElapsedTicks;
-
-                double sumSquared = 0;
-                int largest = 0;
-                int time = (int)ticksThisTime;
-
-                List<double> collisionNumbers = new List<double>();
-                for (int i = 0; i < n; i++)
-                {
-                    sumSquared += hashArrayCount[i] * hashArrayCount[i];
-                    if (largest < hashArrayCount[i])
+                    List<double> collisionNumbers = new List<double>();
+                    for (int i = 0; i < n; i++)
                     {
-                        largest = hashArrayCount[i];
+                        sumSquared += hashArrayCount[i] * hashArrayCount[i];
+                        if (largest < hashArrayCount[i])
+                        {
+                            largest = hashArrayCount[i];
+                        }
+
+                        //if (collectLargeNumberBool)
+                        //{
+                        //    CollectLargeNumbers(hashArrayCount, i, hashTable, collisionNumbers);
+                        //}
                     }
 
-                    //if (collectLargeNumberBool)
-                    //{
-                    //    CollectLargeNumbers(hashArrayCount, i, hashTable, collisionNumbers);
-                    //}
-                }
-
-                if (collectLargeNumberBool)
-                {
-                    Console.WriteLine("# collisions for 10+: " + collisionNumbers.Count);
-                    foreach (double c in collisionNumbers)
+                    if (collectLargeNumberBool)
                     {
-                        File.AppendAllText("C:\\Data\\collisionVal.txt", c + "\n");
+                        Console.WriteLine("# collisions for 10+: " + collisionNumbers.Count);
+                        foreach (double c in collisionNumbers)
+                        {
+                            File.AppendAllText("C:\\Data\\collisionVal.txt", c + "\n");
+                        }
                     }
-                }
 
-                Console.WriteLine("N: " + numElements + ": " + sumSquareProbeLengths + " " + longestProbe + " " + time + " - " + timer.ElapsedMilliseconds / 1000 + " " + a + " " + b + " " + odd_a);
-                File.AppendAllText(
-                    "C:\\Data\\hw2p1.txt", "N: " + numElements + ": " + sumSquareProbeLengths + " " + longestProbe + " " + time + " - " + timer.ElapsedMilliseconds / 1000 + " " + a + " " + b + " " + odd_a + "\n");
+                    Console.WriteLine("N: " + numElements + ": " + sumSquareProbeLengths + " " + longestProbe + " " + time + " - " + timer.ElapsedMilliseconds / 1000 + " " + a + " " + b + " " + odd_a);
+                    File.AppendAllText(
+                        "C:\\Data\\hw2p2_fav_n_" + hashTableMultiplier + ".txt", "N: " + numElements + ": " + sumSquareProbeLengths + " " + longestProbe + " " + time + " - " + timer.ElapsedMilliseconds / 1000 + " " + a + " " + b + " " + odd_a + "\n");
+                }                
             }
 
             Console.ReadLine();
