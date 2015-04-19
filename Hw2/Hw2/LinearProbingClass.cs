@@ -10,21 +10,19 @@ using System.Threading.Tasks;
 
 namespace Hw2
 {
-    class Program
+    public class LinearProbingClass
     {
         static private int n = 100000;
-        private static bool readingNumbersFromFile = true;
+        private static bool readingNumbersFromFile = false;
         private static bool collectLargeNumberBool = false;
 
 
-        static void Main(string[] args)
+        public static void mainfunction()
         {
-            LinearProbingClass.mainfunction();
-            return;
-            File.WriteAllText("C:\\Data\\hw2p1.txt",string.Empty);
+            File.WriteAllText("C:\\Data\\hw2p1.txt", string.Empty);
             if (!readingNumbersFromFile)
             {
-                File.WriteAllText("C:\\Data\\collisionVal.txt", string.Empty);                
+                File.WriteAllText("C:\\Data\\collisionVal.txt", string.Empty);
             }
 
             double primeNum = getPrimeNumber();
@@ -34,7 +32,7 @@ namespace Hw2
             long a = random.Next(1, Int32.MaxValue);
             double b = random.Next(1, Int32.MaxValue);
             long odd_a = random.Next(1, Int32.MaxValue);
-            while (odd_a%2 == 0)
+            while (odd_a % 2 == 0)
             {
                 odd_a = random.Next(1, Int32.MaxValue);
             }
@@ -58,18 +56,23 @@ namespace Hw2
             long x = 0;
 
             int numElements = 100;
-            int[] hashArrayCount = new int[n];
+
+            int hashTableSize = n;
+            int[] hashArrayCount = new int[hashTableSize];
             Stopwatch timePerParse;
 
-            for (numElements = n; numElements < n + 1; numElements = numElements + nextIter(numElements))
+            for (numElements = 100; numElements < n + 1; numElements = numElements + nextIter(numElements))
             {
                 timePerParse = Stopwatch.StartNew();
 
-                List<double>[] hashTable = new List<double>[n];
+                //List<double>[] hashTable = new List<double>[n];
                 for (int i = 0; i < n; i++)
                 {
                     hashArrayCount[i] = 0;
                 }
+
+                int longestProbe = 0;
+                double sumSquareProbeLengths = 0;
 
                 for (int i = 0; i < numElements; i++)
                 {
@@ -80,18 +83,34 @@ namespace Hw2
                         x = (long)numbersReadFromFile[i];
                     }
                     int hashedValue = 0;
-                    hashedValue = GetShiftedHashValue(hashedValue, x, odd_a);
+                    //hashedValue = GetShiftedHashValue(hashedValue, x, odd_a);
                     //hashedValue = GetModPrimeHashValue(hashedValue, a, x, b, primeNum);
-                    //hashedValue = getFavoriteHashValue(hashedValue, a, x, odd_a, b, primeNum);
+                    hashedValue = getFavoriteHashValue(hashedValue, a, x, odd_a, b, primeNum);
+
+                    int index = hashedValue;
+                    int probeLength = 0;
+                    while (hashArrayCount[index] > 0)
+                    {
+                        index = (index + 1) % hashTableSize;
+                        probeLength += 1;
+                    }
+
+                    if (probeLength > longestProbe)
+                    {
+                        longestProbe = probeLength;
+                    }
+                    sumSquareProbeLengths += probeLength*probeLength;
+
+                    hashArrayCount[index] += 1;
 
                     hashArrayCount[hashedValue]++;
 
-                    if (hashTable[hashedValue] == null)
-                    {
-                        hashTable[hashedValue] = new List<double>();
-                    }
+                    //if (hashTable[hashedValue] == null)
+                    //{
+                    //    hashTable[hashedValue] = new List<double>();
+                    //}
 
-                    hashTable[hashedValue].Add(x);
+                    //hashTable[hashedValue].Add(x);
                 }
 
                 timePerParse.Stop();
@@ -110,10 +129,10 @@ namespace Hw2
                         largest = hashArrayCount[i];
                     }
 
-                    if (collectLargeNumberBool)
-                    {
-                        CollectLargeNumbers(hashArrayCount, i, hashTable, collisionNumbers);                        
-                    }
+                    //if (collectLargeNumberBool)
+                    //{
+                    //    CollectLargeNumbers(hashArrayCount, i, hashTable, collisionNumbers);
+                    //}
                 }
 
                 if (collectLargeNumberBool)
@@ -122,12 +141,12 @@ namespace Hw2
                     foreach (double c in collisionNumbers)
                     {
                         File.AppendAllText("C:\\Data\\collisionVal.txt", c + "\n");
-                    }                    
+                    }
                 }
 
-                Console.WriteLine("N: " + numElements + ": " + sumSquared + " " + largest + " " + time + " - " + timer.ElapsedMilliseconds / 1000 + " " + a + " " + b + " " + odd_a);
+                Console.WriteLine("N: " + numElements + ": " + sumSquareProbeLengths + " " + longestProbe + " " + time + " - " + timer.ElapsedMilliseconds / 1000 + " " + a + " " + b + " " + odd_a);
                 File.AppendAllText(
-                    "C:\\Data\\hw2p1.txt", "N: " + numElements + ": " + sumSquared + " " + largest + " " + time + " - " + timer.ElapsedMilliseconds / 1000 + " " + a + " " + b + " " + odd_a + "\n");
+                    "C:\\Data\\hw2p1.txt", "N: " + numElements + ": " + sumSquareProbeLengths + " " + longestProbe + " " + time + " - " + timer.ElapsedMilliseconds / 1000 + " " + a + " " + b + " " + odd_a + "\n");
             }
 
             Console.ReadLine();
@@ -146,19 +165,19 @@ namespace Hw2
 
         private static int getFavoriteHashValue(int hashedValue, long a, long x, long odd_a, double b, double primeNum)
         {
-            hashedValue = (int) (((a*getShiftedHashValue(x, 32, odd_a) + b)%primeNum)%n);
+            hashedValue = (int)(((a * getShiftedHashValue(x, 32, odd_a) + b) % primeNum) % n);
             return hashedValue;
         }
 
         private static int GetModPrimeHashValue(int hashedValue, long a, long x, double b, double primeNum)
         {
-            hashedValue = (int) (((a*x + b)%primeNum)%n);
+            hashedValue = (int)(((a * x + b) % primeNum) % n);
             return hashedValue;
         }
 
         private static int GetShiftedHashValue(int hashedValue, long x, long odd_a)
         {
-            hashedValue = (int) getShiftedHashValue(x, 32, odd_a)%n;
+            hashedValue = (int)getShiftedHashValue(x, 32, odd_a) % n;
             return hashedValue;
         }
 
@@ -169,16 +188,16 @@ namespace Hw2
                 return 100;
             }
             int num = 100;
-            numElements = numElements/100;
+            numElements = numElements / 100;
             for (int i = 0; i < 10000000; i++)
             {
-                if (numElements/10 == 0)
+                if (numElements / 10 == 0)
                 {
                     return num;
                 }
 
-                numElements = numElements/10;
-                num*=10;
+                numElements = numElements / 10;
+                num *= 10;
             }
 
             return num;
@@ -186,7 +205,7 @@ namespace Hw2
 
         private static long generateX(Random r)
         {
-            return (long) (r.Next(1, Int32.MaxValue));
+            return (long)(r.Next(1, Int32.MaxValue));
         }
 
         static long getShiftedHashValue(long x, long l, long a)
