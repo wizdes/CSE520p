@@ -1,0 +1,8 @@
+# this is some random text
+# and stuff
+# Nodes: 5
+0 1
+0 4
+1 2
+1 3
+3 4

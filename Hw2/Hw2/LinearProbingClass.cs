@@ -88,9 +88,9 @@ namespace Hw2
                             x = (long)numbersReadFromFile[i];
                         }
                         int hashedValue = 0;
-                        //hashedValue = GetShiftedHashValue(hashedValue, x, odd_a);
+                        hashedValue = GetShiftedHashValue(hashedValue, x, odd_a);
                         //hashedValue = GetModPrimeHashValue(hashedValue, a, x, b, primeNum);
-                        hashedValue = getFavoriteHashValue(hashedValue, a, x, odd_a, b, primeNum);
+                        //hashedValue = getFavoriteHashValue(hashedValue, a, x, odd_a, b, primeNum);
 
                         int index = hashedValue;
                         int probeLength = 0;
